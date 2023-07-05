@@ -18,13 +18,13 @@ const auth = require('./auth')
 // Define routes and map them to the corresponding functions
 
 // Route for user login
-router.post('/login', auth.checkUser, ctrl.login);
+router.post('/login', ctrl.login);
 
 // Route for changing password
 router.post('/change-password', ctrl.changePassword);
 
 // Route for adding a task
-router.post('/add-task', ctrl.addTask);
+router.post('/add-task', auth.checkUser, ctrl.addTask);
 
 // Route for showing tasks by date
 router.get('/tasks/:date', ctrl.showTaskByDate);

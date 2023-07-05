@@ -1,9 +1,20 @@
 
 //Access-Control-Allow-Origin: any;
-
-const login =  (req, res) => {
+const svr = require('./services')
+const login =  async (req, res) => {
     const { username, password } = req.body;
-    loginUser(username, password);
+    const rst = await svr.loginUser(username, password);
+    console.log('controller')
+    if(rst) {
+        req.session = req.session || '' 
+        req.session.user = username
+        res.status(200)
+        res.send('loggedin')
+    } else {
+        res.status(401)
+        res.send('login fail')
+    }
+    
     // Send appropriate response to the client
 }
 
@@ -13,9 +24,10 @@ const changePassword = (req, res) => {
     // Send appropriate response to the client
 }
 
-const addTask = (req, res) => {
+const addTask = (req, res) => {    
     const { name, startTime, priority, category, reminderTime } = req.body;
-    addTask(name, startTime, priority, category, reminderTime);
+    svr.addTask(name, startTime, priority, category, reminderTime);
+    res.send('Success')
     // Send appropriate response to the client
 }
 
@@ -43,4 +55,18 @@ const sendReminder = (req, res) => {
     const { reminderMessage } = req.body;
     sendReminder(userId, reminderMessage);
     // Send appropriate response to the client
+}
+
+const register = (req, res) => {
+
+}
+
+module.exports = {
+    login,
+    changePassword,
+    addTask,
+    showTaskByDate,
+    deleteTask,
+    reminders,
+    sendReminder
 }
