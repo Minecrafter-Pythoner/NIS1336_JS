@@ -43,4 +43,4 @@ const sendReminder = (req, res) => {
     const { reminderMessage } = req.body;
     sendReminder(userId, reminderMessage);
     // Send appropriate response to the client
-  }
+}
