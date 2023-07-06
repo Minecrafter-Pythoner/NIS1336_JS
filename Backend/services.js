@@ -1,10 +1,14 @@
 const sqlite3 = require("sqlite3").verbose();
 
+const dbPath = './data/data.db';
+const sqlPath = './data/data.sqlite';
+
 function openDatabase() {
   // Specify the path to your SQLite .db file
-  const dbPath = './data/data.db';
+  //const dbPath = './data/data.db';
   // Create a new SQLite database object
-  const db = new sqlite3.Database(dbPath);
+  //const db = new sqlite3.Database(dbPath);
+  const db = new sqlite3.Database(sqlPath);
   // Return the database object
   return db;
 }
