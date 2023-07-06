@@ -43,32 +43,39 @@ function initialize() {
   db.close();
 }
 
-function addUser(username, password) {
+async function addUser(username, password) {
   const db = openDatabase();
 
   // Prepare the SQL statement with placeholders for the username and password
   const sql = 'INSERT INTO Users (username, password) VALUES (?, ?)';
   const values = [username, password];
 
-  // Execute the prepared statement with the provided values
-  db.run(sql, values, function (err) {
-    if (err) {
-      console.error('Error adding user:', err);
-    } else {
-      console.log('User added successfully!');
-      console.log('User ID:', this.lastID);
-    }
-  });
-
-  db.close();
+  try {
+    await new Promise((resolve, reject) => {
+      db.run(sql, values, function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+    console.log('User added successfully!');
+    console.log('User ID:', this.lastID);
+  } catch (err) {
+    console.error('Error adding user:', err);
+  } finally {
+    db.close();
+  }
 }
+
 
 function addTask(name, startTime, priority, category, reminderTime) {
   const db = openDatabase();
 
   const sql = `
-      INSERT INTO Tasks (name, startTime, priority, category, reminderTime)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO Tasks (name, startTime, priority, category, reminderTime, done)
+      VALUES (?, ?, ?, ?, ?, false)
     `;
   const values = [name, startTime, priority, category, reminderTime];
 
@@ -84,83 +91,117 @@ function addTask(name, startTime, priority, category, reminderTime) {
   db.close();
 }
 
-function showTaskByDate(date) {
+async function showTaskByDate(date) {
   const db = openDatabase();
 
   const sql = `
-      SELECT *
-      FROM Tasks
-      WHERE DATE(startTime) = DATE(?)
-      ORDER BY startTime
-    `;
+    SELECT *
+    FROM Tasks
+    WHERE DATE(startTime) = DATE(?)
+    ORDER BY startTime
+  `;
   const values = [date];
 
-  db.all(sql, values, function (err, rows) {
-    if (err) {
-      console.error('Error retrieving tasks:', err);
-    } else {
-      console.log('Tasks for', date + ':');
-      rows.forEach((row) => {
-        console.log(row.name, row.startTime);
+  try {
+    const rows = await new Promise((resolve, reject) => {
+      db.all(sql, values, (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
       });
-    }
-    db.close();
-  });
+    });
 
-  //db.close();
+    console.log('Tasks for', date + ':');
+    rows.forEach((row) => {
+      console.log(row.name, row.startTime);
+    });
+  } catch (err) {
+    console.error('Error retrieving tasks:', err);
+  } finally {
+    db.close();
+  }
 }
 
-function deleteTask(taskId) {
+
+async function deleteTask(taskId) {
   const db = openDatabase();
 
   const sql = 'DELETE FROM Tasks WHERE id = ?';
   const values = [taskId];
 
-  db.run(sql, values, function (err) {
-    if (err) {
-      console.error('Error deleting task:', err);
-    } else {
-      console.log('Task deleted successfully!');
-    }
-  });
-
-  db.close();
+  try {
+    await new Promise((resolve, reject) => {
+      db.run(sql, values, function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+    console.log('Task deleted successfully!');
+  } catch (err) {
+    console.error('Error deleting task:', err);
+  } finally {
+    db.close();
+  }
 }
-async function loginUser(username, password) {
+
+
+async function loginUser(req, username, password) {
   const db = openDatabase();
 
   const sql = 'SELECT id FROM Users WHERE username = ? AND password = ?';
   const values = [username, password];
 
   try {
-    await db.get(sql, values)
-    console.log('User authenticated!');
-    console.log('User ID:', row.id);
-    return true
+    await new Promise((resolve, reject) => {
+      const row = db.get(sql, values, function(err){
+        if(err) {
+          console.error('Error authenticating user:', err);
+          reject(err);
+        }
+        else {
+          req.session.userId = row.id;
+          console.log('User authenticated!');
+          console.log('User ID:', row.id);
+          resolve();}
+      }z
+      )
+    })
   } catch (err) {
-    console.log('Invalid credentials!');
-    return false
+    return false;
   } finally {
-    db.close()
+    db.close();
   }
 }
 
-function changePassword(userId, newPassword) {
+async function changePassword(userId, newPassword) {
   const db = openDatabase();
 
   const sql = 'UPDATE Users SET password = ? WHERE id = ?';
   const values = [newPassword, userId];
 
-  db.run(sql, values, function (err) {
-    if (err) {
-      console.error('Error changing password:', err);
-    } else {
-      console.log('Password changed successfully!');
-    }
-  });
-
-  db.close();
+  try {
+    await new Promise((resolve, reject) => {
+      db.run(sql, values, function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+    console.log('Password changed successfully!');
+  } catch (err) {
+    console.error('Error changing password:', err);
+  } finally {
+    db.close();
+  }
 }
+
 
 function scheduleReminder(taskId, reminderTime) {
   // Implement your logic to schedule reminders here

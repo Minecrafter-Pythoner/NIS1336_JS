@@ -24,7 +24,8 @@ router.post('/login', ctrl.login);
 router.post('/change-password', ctrl.changePassword);
 
 // Route for adding a task
-router.post('/add-task', auth.checkUser, ctrl.addTask);
+//router.post('/add-task', auth.checkUser, ctrl.addTask);
+router.post('/add-task', ctrl.addTask);
 
 // Route for showing tasks by date
 router.get('/tasks/:date', ctrl.showTaskByDate);

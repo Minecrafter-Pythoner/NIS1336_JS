@@ -1,18 +1,18 @@
 
 //Access-Control-Allow-Origin: any;
 const svr = require('./services')
+
 const login =  async (req, res) => {
     const { username, password } = req.body;
-    const rst = await svr.loginUser(username, password);
-    console.log('controller')
+    const rst = await svr.loginUser(req, username, password);
     if(rst) {
         req.session = req.session || '' 
         req.session.user = username
         res.status(200)
-        res.send('loggedin')
+        res.send('Logged in successfully')
     } else {
         res.status(401)
-        res.send('login fail')
+        res.send('Login failed')
     }
     
     // Send appropriate response to the client
