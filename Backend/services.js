@@ -1,11 +1,10 @@
 const sqlite3 = require("sqlite3").verbose();
+const CryptoJS = require('crypto-js');
 
 const dbPath = './data/data.db';
 const sqlPath = './data/data.sqlite';
 
 function openDatabase() {
-  // Specify the path to your SQLite .db file
-  //const dbPath = './data/data.db';
   // Create a new SQLite database object
   //const db = new sqlite3.Database(dbPath);
   const db = new sqlite3.Database(sqlPath);
@@ -125,7 +124,7 @@ async function showTaskByDate(date) {
 }
 
 
-async function deleteTask(taskId) {
+async function deleteTask(taskId) {//ERR: Not working as expected: always log deleted successfully but actually did not delete the task
   const db = openDatabase();
 
   const sql = 'DELETE FROM Tasks WHERE id = ?';
@@ -142,40 +141,36 @@ async function deleteTask(taskId) {
       });
     });
     console.log('Task deleted successfully!');
+    return true;
   } catch (err) {
     console.error('Error deleting task:', err);
+    return false;
   } finally {
     db.close();
   }
 }
 
 
-async function loginUser(req, username, password) {
+async function loginUser(req, username, password) {//ERR: Not working as expected always return 401 even if username and password are correct
   const db = openDatabase();
-
+  console.log(db)
+  let rst = false
   const sql = 'SELECT id FROM Users WHERE username = ? AND password = ?';
   const values = [username, password];
 
   try {
-    await new Promise((resolve, reject) => {
-      const row = db.get(sql, values, function(err){
-        if(err) {
-          console.error('Error authenticating user:', err);
-          reject(err);
-        }
-        else {
-          req.session.userId = row.id;
-          console.log('User authenticated!');
-          console.log('User ID:', row.id);
-          resolve();}
-      }z
-      )
-    })
+    const row = await db.run(sql, values);
+    console.log(row);
+    req.session.userId = row.id;
+    console.log('User authenticated!');
+    console.log('User ID:', row.id);
+    rst = true;
   } catch (err) {
-    return false;
+    console.log(err)
   } finally {
     db.close();
   }
+  return rst;
 }
 
 async function changePassword(userId, newPassword) {

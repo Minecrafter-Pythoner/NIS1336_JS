@@ -31,7 +31,8 @@ router.post('/add-task', ctrl.addTask);
 router.get('/tasks/:date', ctrl.showTaskByDate);
 
 // Route for deleting a task
-router.delete('/tasks/:taskId', ctrl.deleteTask);
+//router.delete('/tasks/:taskId', auth.checkUser, ctrl.deleteTask);
+router.delete('/tasks', ctrl.deleteTask);
 
 // Route for scheduling a reminder
 router.post('/tasks/:taskId/reminders', ctrl.reminders);

@@ -14,13 +14,11 @@ const login =  async (req, res) => {
         res.status(401)
         res.send('Login failed')
     }
-    
-    // Send appropriate response to the client
 }
 
-const changePassword = (req, res) => {
+const changePassword =  async (req, res) => {
     const { userId, newPassword } = req.body;
-    changePassword(userId, newPassword);
+    const rst = await svr.changePassword(userId, newPassword);
     // Send appropriate response to the client
 }
 
@@ -33,14 +31,21 @@ const addTask = (req, res) => {
 
 const showTaskByDate = (req, res) => {
     const { date } = req.params;
-    showTaskByDate(date);
+    svr.showTaskByDate(date);
     // Send appropriate response to the client
 }
 
-const deleteTask = (req, res) => {
+const deleteTask =  async (req, res) => {
     const { taskId } = req.params;
-    deleteTask(taskId);
-    // Send appropriate response to the client
+    const rst = await svr.deleteTask(taskId);
+    if(rst){
+        res.status(200);
+        res.send(`Deleted task ${taskId} successfully.`)
+    }
+    else{
+        res.status(404);
+        res.send(`Could not delete task ${taskId}.`)
+    }
 }
 
 const reminders =  (req, res) => {
@@ -53,7 +58,7 @@ const reminders =  (req, res) => {
 const sendReminder = (req, res) => {
     const { userId } = req.params;
     const { reminderMessage } = req.body;
-    sendReminder(userId, reminderMessage);
+    svr.sendReminder(userId, reminderMessage);
     // Send appropriate response to the client
 }
 
