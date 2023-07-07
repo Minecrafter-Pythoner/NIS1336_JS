@@ -15,7 +15,7 @@ const sqlPath = './data/data.sqlite';
 
 async function openDB() {
   return sqlite.open({
-    filename: dbPath,
+    filename: sqlPath,
     driver: sqlite3.Database
   })
 }
@@ -55,15 +55,7 @@ async function addUser(username, password) {
   const values = [username, password];
 
   try {
-    await new Promise((resolve, reject) => {
-      db.run(sql, values, function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
+    await db.get(sql, values);
     console.log('User added successfully!');
     console.log('User ID:', this.lastID);
   } catch (err) {
@@ -74,8 +66,8 @@ async function addUser(username, password) {
 }
 
 
-function addTask(name, startTime, priority, category, reminderTime) {
-  const db = openDB();
+async function addTask(name, startTime, priority, category, reminderTime) {
+  const db = await openDB();
 
   const sql = `
       INSERT INTO Tasks (name, startTime, priority, category, reminderTime, done)
@@ -83,16 +75,15 @@ function addTask(name, startTime, priority, category, reminderTime) {
     `;
   const values = [name, startTime, priority, category, reminderTime];
 
-  db.run(sql, values, function (err) {
-    if (err) {
-      console.error('Error adding task:', err);
-    } else {
-      console.log('Task added successfully!');
-      console.log('Task ID:', this.lastID);
-    }
-  });
-
-  db.close();
+  try {
+    await db.get(sql, values);
+    console.log('Task added successfully!');
+    console.log('Task ID:', this.lastID);
+  } catch (err) {
+    console.error('Error adding task:', err)
+  } finally {
+    db.close();
+  }
 }
 
 async function showTaskByDate(date) {
@@ -166,7 +157,7 @@ async function loginUser(username, password) {//ERR: Not working as expected alw
   try {
     const row = await db.get(sql, values);
     console.log(row);
-    
+
     console.log('User authenticated!');
     console.log('User ID:', row.id);
     rst = row.id;
