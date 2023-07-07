@@ -6,19 +6,26 @@ const login =  async (req, res) => {
     const { username, password } = req.body;
     const rst = await svr.loginUser(req, username, password);
     if(rst) {
-        req.session = req.session || '' 
-        req.session.user = username
-        res.status(200)
-        res.send('Logged in successfully')
+        req.session = req.session || '' ;
+        req.session.user = username;
+        res.status(200);
+        res.send('Logged in successfully');
     } else {
-        res.status(401)
-        res.send('Login failed')
+        res.status(401);
+        res.send('Login failed');
     }
 }
 
 const changePassword =  async (req, res) => {
     const { userId, newPassword } = req.body;
     const rst = await svr.changePassword(userId, newPassword);
+    if(rst){
+        res.status(200);
+        res.send('Password Changed Successfully');
+    } else {
+        res.status(404);
+        res.send('Failed to change passwrod');
+    }
     // Send appropriate response to the client
 }
 

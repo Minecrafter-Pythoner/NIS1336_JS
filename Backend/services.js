@@ -1,5 +1,6 @@
 const sqlite3 = require("sqlite3").verbose();
 const CryptoJS = require('crypto-js');
+const sqlite = requite("sqlite").verbose();
 
 const dbPath = './data/data.db';
 const sqlPath = './data/data.sqlite';
@@ -7,7 +8,7 @@ const sqlPath = './data/data.sqlite';
 function openDatabase() {
   // Create a new SQLite database object
   //const db = new sqlite3.Database(dbPath);
-  const db = new sqlite3.Database(sqlPath);
+  const db = new sqlite.Database(sqlPath);
   // Return the database object
   return db;
 }
@@ -151,7 +152,7 @@ async function deleteTask(taskId) {//ERR: Not working as expected: always log de
 }
 
 
-async function loginUser(req, username, password) {//ERR: Not working as expected always return 401 even if username and password are correct
+async function loginUser(req, username, password) {//ERR: Not working as expected always return true even if password is incorrect
   const db = openDatabase();
   console.log(db)
   let rst = false
@@ -166,35 +167,50 @@ async function loginUser(req, username, password) {//ERR: Not working as expecte
     console.log('User ID:', row.id);
     rst = true;
   } catch (err) {
-    console.log(err)
+    console.log(err);
   } finally {
     db.close();
   }
   return rst;
 }
 
-async function changePassword(userId, newPassword) {
+async function changePassword(userId, newPassword) {//ERR: Not working as expected always return true even if invalid userId
   const db = openDatabase();
 
   const sql = 'UPDATE Users SET password = ? WHERE id = ?';
   const values = [newPassword, userId];
+  let rst = false;
 
-  try {
-    await new Promise((resolve, reject) => {
-      db.run(sql, values, function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
+  try{
+    await db.run(sql, values);
     console.log('Password changed successfully!');
-  } catch (err) {
-    console.error('Error changing password:', err);
+    rst = true;
+  } catch(err) {
+    console.log('Error changing password: ', err);
   } finally {
     db.close();
+    return rst;
   }
+
+  // try {
+  //   await new Promise((resolve, reject) => {
+  //     let rst = false;
+  //     db.run(sql, values, function (err) {
+  //       if (err) {
+  //         reject(err);
+  //       } else {
+  //         resolve();
+  //       }
+  //     });
+  //   });
+  //   console.log('Password changed successfully!');
+  //   rst = true;
+  // } catch (err) {
+  //   console.error('Error changing password:', err);
+  // } finally {
+  //   db.close();
+  //   return rst;
+  // }
 }
 
 
