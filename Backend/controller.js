@@ -4,10 +4,10 @@ const svr = require('./services')
 
 const login =  async (req, res) => {
     const { username, password } = req.body;
-    const rst = await svr.loginUser(req, username, password);
-    if(rst) {
+    const rst = await svr.loginUser(username, password);
+    if(rst > 0) {
         req.session = req.session || '' ;
-        req.session.user = username;
+        req.session.user = rst;
         res.status(200);
         res.send('Logged in successfully');
     } else {

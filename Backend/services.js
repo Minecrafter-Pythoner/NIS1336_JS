@@ -1,50 +1,54 @@
 const sqlite3 = require("sqlite3").verbose();
 const CryptoJS = require('crypto-js');
-const sqlite = requite("sqlite").verbose();
+const sqlite = require("sqlite");
 
 const dbPath = './data/data.db';
 const sqlPath = './data/data.sqlite';
 
-function openDatabase() {
-  // Create a new SQLite database object
-  //const db = new sqlite3.Database(dbPath);
-  const db = new sqlite.Database(sqlPath);
-  // Return the database object
-  return db;
+// function openDB() {
+//   // Create a new SQLite database object
+//   //const db = new sqlite3.Database(dbPath);
+//   const db = new sqlite.Database(sqlPath);
+//   // Return the database object
+//   return db;
+// }
+
+async function openDB() {
+  return sqlite.open({
+    filename: dbPath,
+    driver: sqlite3.Database
+  })
 }
 
-function initialize() {
-  const db = openDatabase();
+async function initialize() {
+  const db = await openDB();
 
-  db.serialize(() => {
-    // Execute SQL statements to create the tables
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Tasks (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          startTime TEXT NOT NULL,
-          priority TEXT,
-          category TEXT,
-          reminderTime TEXT,
-          user INTEGER, 
-          done BOOL
-        )
-      `);
+  await db.run(`
+  CREATE TABLE IF NOT EXISTS Tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    startTime TEXT NOT NULL,
+    priority TEXT,
+    category TEXT,
+    reminderTime TEXT,
+    user INTEGER, 
+    done BOOL
+  )
+`);
 
-    db.run(`
-        CREATE TABLE IF NOT EXISTS Users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          username TEXT UNIQUE NOT NULL,
-          password TEXT NOT NULL
-        )
-      `);
-  });
+  await db.run(`
+  CREATE TABLE IF NOT EXISTS Users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
+  )
+`);
 
   db.close();
 }
 
 async function addUser(username, password) {
-  const db = openDatabase();
+  const db = openDB();
 
   // Prepare the SQL statement with placeholders for the username and password
   const sql = 'INSERT INTO Users (username, password) VALUES (?, ?)';
@@ -71,7 +75,7 @@ async function addUser(username, password) {
 
 
 function addTask(name, startTime, priority, category, reminderTime) {
-  const db = openDatabase();
+  const db = openDB();
 
   const sql = `
       INSERT INTO Tasks (name, startTime, priority, category, reminderTime, done)
@@ -92,7 +96,7 @@ function addTask(name, startTime, priority, category, reminderTime) {
 }
 
 async function showTaskByDate(date) {
-  const db = openDatabase();
+  const db = openDB();
 
   const sql = `
     SELECT *
@@ -126,7 +130,7 @@ async function showTaskByDate(date) {
 
 
 async function deleteTask(taskId) {//ERR: Not working as expected: always log deleted successfully but actually did not delete the task
-  const db = openDatabase();
+  const db = openDB();
 
   const sql = 'DELETE FROM Tasks WHERE id = ?';
   const values = [taskId];
@@ -152,20 +156,20 @@ async function deleteTask(taskId) {//ERR: Not working as expected: always log de
 }
 
 
-async function loginUser(req, username, password) {//ERR: Not working as expected always return true even if password is incorrect
-  const db = openDatabase();
+async function loginUser(username, password) {//ERR: Not working as expected always return true even if password is incorrect
+  const db = await openDB();
   console.log(db)
-  let rst = false
+  let rst = 0
   const sql = 'SELECT id FROM Users WHERE username = ? AND password = ?';
   const values = [username, password];
 
   try {
-    const row = await db.run(sql, values);
+    const row = await db.get(sql, values);
     console.log(row);
-    req.session.userId = row.id;
+    
     console.log('User authenticated!');
     console.log('User ID:', row.id);
-    rst = true;
+    rst = row.id;
   } catch (err) {
     console.log(err);
   } finally {
@@ -175,17 +179,17 @@ async function loginUser(req, username, password) {//ERR: Not working as expecte
 }
 
 async function changePassword(userId, newPassword) {//ERR: Not working as expected always return true even if invalid userId
-  const db = openDatabase();
+  const db = openDB();
 
   const sql = 'UPDATE Users SET password = ? WHERE id = ?';
   const values = [newPassword, userId];
   let rst = false;
 
-  try{
+  try {
     await db.run(sql, values);
     console.log('Password changed successfully!');
     rst = true;
-  } catch(err) {
+  } catch (err) {
     console.log('Error changing password: ', err);
   } finally {
     db.close();
