@@ -48,14 +48,14 @@ async function initialize() {
 }
 
 async function addUser(username, password) {
-  const db = openDB();
+  const db = await openDB();
 
   // Prepare the SQL statement with placeholders for the username and password
   const sql = 'INSERT INTO Users (username, password) VALUES (?, ?)';
   const values = [username, password];
 
   try {
-    await db.get(sql, values);
+    const row = await db.get(sql, values);
     console.log('User added successfully!');
     console.log('User ID:', this.lastID);
   } catch (err) {
@@ -68,6 +68,7 @@ async function addUser(username, password) {
 
 async function addTask(name, startTime, priority, category, reminderTime) {
   const db = await openDB();
+  let rst = false;
 
   const sql = `
       INSERT INTO Tasks (name, startTime, priority, category, reminderTime, done)
@@ -79,15 +80,17 @@ async function addTask(name, startTime, priority, category, reminderTime) {
     await db.get(sql, values);
     console.log('Task added successfully!');
     console.log('Task ID:', this.lastID);
+    rst = true;
   } catch (err) {
     console.error('Error adding task:', err)
   } finally {
     db.close();
   }
+  return rst;
 }
 
 async function showTaskByDate(date) {
-  const db = openDB();
+  const db = await openDB();
 
   const sql = `
     SELECT *
@@ -98,59 +101,43 @@ async function showTaskByDate(date) {
   const values = [date];
 
   try {
-    const rows = await new Promise((resolve, reject) => {
-      db.all(sql, values, (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows);
-        }
-      });
-    });
+    const rows = db.get(sql, values);
+    console.log(rows);
 
-    console.log('Tasks for', date + ':');
-    rows.forEach((row) => {
-      console.log(row.name, row.startTime);
-    });
+    console.log('Shown Tasks By Date!');
+    rst = rows;
   } catch (err) {
-    console.error('Error retrieving tasks:', err);
+    console.log(err);
   } finally {
-    db.close();
+    db.close;
   }
 }
 
-
 async function deleteTask(taskId) {//ERR: Not working as expected: always log deleted successfully but actually did not delete the task
-  const db = openDB();
+  const db = await openDB();
 
   const sql = 'DELETE FROM Tasks WHERE id = ?';
   const values = [taskId];
+  let rst = false;
 
   try {
-    await new Promise((resolve, reject) => {
-      db.run(sql, values, function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
-    console.log('Task deleted successfully!');
-    return true;
+    const row = await db.get(sql, values);
+    console.log(row);
+
+    console.log('Successfully deleted Task ', taskId, '! ');
+    rst = true;
   } catch (err) {
     console.error('Error deleting task:', err);
-    return false;
   } finally {
     db.close();
   }
+  return rst;
 }
 
 
 async function loginUser(username, password) {//ERR: Not working as expected always return true even if password is incorrect
   const db = await openDB();
-  console.log(db)
-  let rst = 0
+  let rst = 0;
   const sql = 'SELECT id FROM Users WHERE username = ? AND password = ?';
   const values = [username, password];
 
@@ -170,14 +157,14 @@ async function loginUser(username, password) {//ERR: Not working as expected alw
 }
 
 async function changePassword(userId, newPassword) {//ERR: Not working as expected always return true even if invalid userId
-  const db = openDB();
+  const db = await openDB();
 
   const sql = 'UPDATE Users SET password = ? WHERE id = ?';
   const values = [newPassword, userId];
   let rst = false;
 
   try {
-    await db.run(sql, values);
+    await db.get(sql, values);
     console.log('Password changed successfully!');
     rst = true;
   } catch (err) {
