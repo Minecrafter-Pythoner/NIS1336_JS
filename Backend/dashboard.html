@@ -11,54 +11,21 @@
     <!-- Task items will be dynamically added here -->
   </ul>
 
-  <h2>Add Task</h2>
-  <form id="addTaskForm">
-    <input type="text" id="taskInput" placeholder="Enter task description" required>
+  <form action="/add-task" method="POST">
+    <input type="text" id="name" name="name" placeholder="Enter task name" required>
+    <input type="text" id="startTime" name="startTime" placeholder="Enter task start time" required>
+    <input type="text" id="priority" name="priority" placeholder="Enter task priority" required>
+    <input type="text" id="category" name="category" placeholder="Enter task category" required>
+    <input type="text" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
     <button type="submit">Add Task</button>
   </form>
 
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script>
-    // Fetch tasks and populate the list
-    axios.get('/tasks')
-      .then(response => {
-        const tasks = response.data;
-        const taskList = document.getElementById('taskList');
 
-        tasks.forEach(task => {
-          const li = document.createElement('li');
-          li.textContent = task.description;
-          taskList.appendChild(li);
-        });
-      })
-      .catch(error => {
-        console.error(error);
-      });
+  <form action="/tasks" method="DELETE">
+    <input type="text" id="id" name="id" placeholder="Enter task Id" required>
+    <button type="submit">Delete Task</button>
+  </form>
 
-    // Add task form submission
-    const addTaskForm = document.getElementById('addTaskForm');
-    const taskInput = document.getElementById('taskInput');
-
-    addTaskForm.addEventListener('submit', event => {
-      event.preventDefault();
-
-      const description = taskInput.value;
-
-      axios.post('/add-task', { description })
-        .then(response => {
-          const newTask = response.data;
-
-          const li = document.createElement('li');
-          li.textContent = newTask.description;
-
-          taskList.appendChild(li);
-
-          taskInput.value = '';
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    });
-  </script>
+  
 </body>
 </html>
