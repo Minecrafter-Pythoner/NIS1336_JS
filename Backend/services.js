@@ -196,7 +196,7 @@ async function changePassword(userId, newPassword) {//ERR: Not working as expect
 }
 
 
-function scheduleReminder(taskId, reminderTime) {
+async function scheduleReminder(taskId, reminderTime) {
   // Implement your logic to schedule reminders here
   // This function may involve external libraries or services to handle reminders
   // You can integrate with a notification service or schedule tasks in the server
@@ -204,44 +204,50 @@ function scheduleReminder(taskId, reminderTime) {
   console.log('Reminder scheduled for Task ID:', taskId);
 }
 
-function sendReminder(userId, reminderMessage) {
+async function sendReminder(userId, reminderMessage) {
   // Implement your logic to send reminders to the user
   // This function may involve sending emails, push notifications, or other forms of notifications
 
   console.log('Reminder sent to User ID:', userId);
 }
 
-function checkUser(username, password) {  // Retrieve the username and password from the request body or headers
+async function checkUser(username, password) {  // Retrieve the username and password from the request body or headers
 
   // Open the database connection
-  const db = new sqlite3.Database('./data/data.db');
+  const db = await openDB();
 
-  // Prepare the SQL statement to retrieve the user by username and password
-  const sql = 'SELECT * FROM Users WHERE username = ? AND password = ?';
-  const values = [username, password];
 
-  // Execute the prepared statement
-  db.get(sql, values, (err, row) => {
-    if (err) {
-      // Handle any database error
-      console.error('Error retrieving user:', err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
+  db.close();
+  // Call the next middleware or route handler
+  next();
+  ;
+}
 
-    // If the user is not found or the credentials are incorrect, send an error response
-    if (!row) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
+async function queryTasks() {
+  const db = await openDB();
 
-    // Attach the user object to the request object for further processing
-    req.user = row;
+  const sql = 'SELECT * FROM Tasks';
 
-    // Close the database connection
+  try {
+    const rows = await db.get(sql);
+    const tasks = await rows.map((row) => {
+      return {
+        taskId: row.id,
+        startTime: row.startTime,
+        priority: row.priority,
+        category: row.category,
+        reminderTime: row.reminderTime,
+        userId: row.userId,
+        done: row.done
+      };
+    });
+    return JSON.stringify(tasks);
+  } catch (err) {
+    console.error('Error querying tasks:', err);
+    return null;
+  } finally {
     db.close();
-
-    // Call the next middleware or route handler
-    next();
-  });
+  }
 }
 
 const services = {
@@ -254,6 +260,7 @@ const services = {
   changePassword,
   scheduleReminder,
   sendReminder,
+  queryTasks
 };
 
 // Export the services object
