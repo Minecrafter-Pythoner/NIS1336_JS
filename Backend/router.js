@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const path = require('path');
 // Import the backend functions
 const {
   loginUser,
@@ -19,6 +19,14 @@ const auth = require('./auth')
 
 // Route for user login
 router.post('/login', ctrl.login);
+
+router.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+router.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
 
 // Route for changing password
 router.post('/change-password', ctrl.changePassword);

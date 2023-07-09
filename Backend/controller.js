@@ -9,7 +9,7 @@ const login =  async (req, res) => {
         req.session = req.session || '' ;
         req.session.user = rst;
         res.status(200);
-        res.send('Logged in successfully');
+        res.redirect('/dashboard');
     } else {
         res.status(401);
         res.send('Login failed');

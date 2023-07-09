@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+</head>
+<body>
+  <h1>Welcome to the Dashboard</h1>
+
+  <h2>Tasks</h2>
+  <ul id="taskList">
+    <!-- Task items will be dynamically added here -->
+  </ul>
+
+  <h2>Add Task</h2>
+  <form id="addTaskForm">
+    <input type="text" id="taskInput" placeholder="Enter task description" required>
+    <button type="submit">Add Task</button>
+  </form>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    // Fetch tasks and populate the list
+    axios.get('/tasks')
+      .then(response => {
+        const tasks = response.data;
+        const taskList = document.getElementById('taskList');
+
+        tasks.forEach(task => {
+          const li = document.createElement('li');
+          li.textContent = task.description;
+          taskList.appendChild(li);
+        });
+      })
+      .catch(error => {
+        console.error(error);
+      });
+
+    // Add task form submission
+    const addTaskForm = document.getElementById('addTaskForm');
+    const taskInput = document.getElementById('taskInput');
+
+    addTaskForm.addEventListener('submit', event => {
+      event.preventDefault();
+
+      const description = taskInput.value;
+
+      axios.post('/add-task', { description })
+        .then(response => {
+          const newTask = response.data;
+
+          const li = document.createElement('li');
+          li.textContent = newTask.description;
+
+          taskList.appendChild(li);
+
+          taskInput.value = '';
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    });
+  </script>
+</body>
+</html>
