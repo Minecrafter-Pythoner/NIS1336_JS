@@ -66,15 +66,15 @@ async function addUser(username, password) {
 }
 
 
-async function addTask(name, startTime, priority, category, reminderTime) {
+async function addTask(name, startTime, priority, category, reminderTime, userId) {
   const db = await openDB();
   let rst = false;
 
   const sql = `
-      INSERT INTO Tasks (name, startTime, priority, category, reminderTime, done)
-      VALUES (?, ?, ?, ?, ?, false)
+      INSERT INTO Tasks (name, startTime, priority, category, reminderTime, user, done)
+      VALUES (?, ?, ?, ?, ?, ?, false)
     `;
-  const values = [name, startTime, priority, category, reminderTime];
+  const values = [name, startTime, priority, category, reminderTime, userId];
 
   try {
     await db.get(sql, values);

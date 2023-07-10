@@ -9,5 +9,21 @@ function checkUser(req, res, next) {
   }
 }
 
+async function authorizeUser(req, res, next) {
+  if(req.session && req.session.user) {
+    const userId = req.session.user;
+    next(userId);
+  }
+  else {
+    res.status(401)
+    res.send("401 Unauthorized")
+  }
+
+}
+
 // Export the middleware function(s)
-module.exports = {checkUser, };
+const auth = {
+  checkUser,
+  authorizeUser
+};
+module.exports = auth;
