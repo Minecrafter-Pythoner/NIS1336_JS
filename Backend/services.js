@@ -263,6 +263,34 @@ const services = {
   queryTasks
 };
 
+async function queryTasks() {
+  const db = await openDB();
+  console.log('2');
+  const sql = 'SELECT * FROM Tasks';
+
+  try {
+    const rows = await db.all(sql);
+    const tasks = await rows.map((row) => {
+      return {
+        taskId: row.id,
+        startTime: row.startTime,
+        priority: row.priority,
+        category: row.category,
+        reminderTime: row.reminderTime,
+        userId: row.userId,
+        done: row.done
+      };
+    });
+    console.log(JSON.stringify(tasks));
+    return JSON.stringify(tasks);
+  } catch (err) {
+    console.error('Error querying tasks:', err);
+    return null;
+  } finally {
+    db.close();
+  }
+}
+
 // Export the services object
 initialize()
 

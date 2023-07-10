@@ -9,7 +9,7 @@ const login =  async (req, res) => {
         req.session = req.session || '' ;
         req.session.user = rst;
         res.status(200);
-        res.send('Logged in successfully');
+        res.redirect('/dashboard');
     } else {
         res.status(401);
         res.send('Login failed');
@@ -70,6 +70,14 @@ const sendReminder = (req, res) => {
     // Send appropriate response to the client
 }
 
+async function queryTasks(req, res){
+    console.log('1');
+    const result = await svr.queryTasks();
+    console.log(JSON.stringify(result));
+    res.send(result);
+}
+
+
 const register = (req, res) => {
 
 }
@@ -81,5 +89,6 @@ module.exports = {
     showTaskByDate,
     deleteTask,
     reminders,
+    queryTasks,
     sendReminder
 }

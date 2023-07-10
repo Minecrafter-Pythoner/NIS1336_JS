@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+</head>
+<body>
+  <h1>Welcome to the Dashboard</h1>
+
+  <h2>Tasks</h2>
+  <ul id="taskList">
+    <!-- Task items will be dynamically added here -->
+  </ul>
+  <script>
+    // Function to query tasks and update the HTML
+    async function updateTaskList() {
+      const taskList = document.getElementById('taskList');
+      
+      // Clear existing tasks
+      taskList.innerHTML = '';
+
+      try {
+        // Query tasks from the server
+        const tasksResponse = await fetch('/query-tasks');
+        const tasks = await tasksResponse.json();
+
+        // Iterate over the tasks and create list items
+        tasks.forEach((task) => {
+          const li = document.createElement('li');
+          li.textContent = `${task.startTime} - ${task.category} - ${task.priority}`;
+          taskList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
+    }
+
+    // Call the updateTaskList function to initially populate the task list
+    updateTaskList();
+  </script>
+  <form action="/add-task" method="POST">
+    <input type="text" id="name" name="name" placeholder="Enter task name" required>
+    <input type="text" id="startTime" name="startTime" placeholder="Enter task start time" required>
+    <input type="text" id="priority" name="priority" placeholder="Enter task priority" required>
+    <input type="text" id="category" name="category" placeholder="Enter task category" required>
+    <input type="text" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
+    <button type="submit">Add Task</button>
+  </form>
+
+
+  <form action='/delete-task' method="DELETE">
+    <input type="text" id="taskId" name="taskId" placeholder="Enter task Id" required>
+    <button type="submit">Delete Task</button>
+  </form>
+
+  
+</body>
+</html>
