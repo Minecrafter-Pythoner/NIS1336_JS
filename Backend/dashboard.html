@@ -12,9 +12,21 @@
   </ul>
   <script>
     // Function to query tasks and update the HTML
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    function transferTimeFromat(time){
+      const month = String(time.getMonth() + 1).padStart(2, '0'); // Adding 1 to get the correct month
+      const day = String(time.getDate()).padStart(2, '0');
+      const hours = String(time.getHours()).padStart(2, '0');
+      const minutes = String(time.getMinutes()).padStart(2, '0');
+
+      return `${month}/${day}/${hours}/${minutes}`;
+    }
     async function updateTaskList() {
       const taskList = document.getElementById('taskList');
-      
+      let time = new Date();
+      time = transferTimeFromat(time);
       // Clear existing tasks
       taskList.innerHTML = '';
 
@@ -22,20 +34,39 @@
         // Query tasks from the server
         const tasksResponse = await fetch('/query-tasks');
         const tasks = await tasksResponse.json();
-
+        
         // Iterate over the tasks and create list items
         tasks.forEach((task) => {
           const li = document.createElement('li');
-          li.textContent = `${task.startTime} - ${task.category} - ${task.priority}`;
+          console.log(time);
+          if(task.reminderTime <= time){
+            alert(`Task ${task.taskId} is overdue`);
+          }
+          li.textContent = `${task.taskId} - ${task.name} -  ${task.startTime} - ${task.category} - ${task.priority} - ${task.reminderTime}`;
           taskList.appendChild(li);
         });
       } catch (error) {
         console.error('Error fetching tasks:', error);
       }
     }
-
+  /*async function toupdate(){
+    while(true){
+      sleep(3000);
+      updateTaskList();
+    }
+  }
+  toupdate();
+  */
+  async function runPeriod(){
+    while(true){
+      await updateTaskList();
+      await new Promise(resolve => setTimeout(resolve,30000));
+    }
+  }
+  runPeriod();
     // Call the updateTaskList function to initially populate the task list
-    updateTaskList();
+    
+    
   </script>
   <form action="/add-task" method="POST">
     <input type="text" id="name" name="name" placeholder="Enter task name" required>
@@ -51,6 +82,7 @@
     <input type="text" id="taskId" name="taskId" placeholder="Enter task Id" required>
     <button type="submit">Delete Task</button>
   </form>
+  <iframe src="https://free.timeanddate.com/clock/i8xhju0g/n237/tlcn/th1" frameborder="0" width="57" height="18"></iframe>
 
   
 </body>
