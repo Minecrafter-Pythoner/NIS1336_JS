@@ -44,7 +44,7 @@ const showTaskByDate = (req, res) => {
 }
 
 const deleteTask =  async (req, res) => {
-    const { taskId } = req.params;
+    const { taskId } = req.body;
     const rst = await svr.deleteTask(taskId);
     if(rst){
         res.status(200);
