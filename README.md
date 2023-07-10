@@ -3,6 +3,7 @@
 ## TODO
 
 ### Backend
+
     1. Rewrite services using sqlite(which supports async-await) rather than sqlite3;
     2. Write the logic for ScheduleReminder and SendReminder;
     3. Write the logic for authorization and permission judgement;
@@ -10,15 +11,16 @@
 
     APIs:
     [x]initialize
-    [ ]addUser
+    [x]addUser
     [x]addTask (partial: need to fix output taskID)
     [ ]showTasksByDate
-    [ ]deleteTask
+    [x]deleteTask
     [x]loginUser
-    [ ]changePassword
-    [ ]scheduleReminder
-    [ ]sendReminder
-    [ ]checkUser
+    [x]changePassword
+    [x]scheduleReminder
+    [x]sendReminder
+    [x]checkUser
 
 ### Frontend
-    Not Started yet
+
+    Bare bones
