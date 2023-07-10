@@ -95,5 +95,6 @@ module.exports = {
     deleteTask,
     reminders,
     queryTasks,
-    sendReminder
+    sendReminder,
+    register
 }

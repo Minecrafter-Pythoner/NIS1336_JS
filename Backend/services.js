@@ -252,18 +252,26 @@ async function queryTasks(user) {
   }
 }
 
-const services = {
-  initialize,
-  addUser,
-  addTask,
-  showTaskByDate,
-  deleteTask,
-  loginUser,
-  changePassword,
-  scheduleReminder,
-  sendReminder,
-  queryTasks
-};
+async function queryTasks() {
+  const db = await openDB();
+  let rst = false;
+  const sql = `
+    INSERT INTO Users (username, password)
+    VALUES (?, ?)
+  `
+  const values = [username, password];
+
+  try{
+    await db.get(sql, values);
+    console.log('User added successfully!');
+    rst = true;
+  } catch(err){
+    console.error('Error adding user:', err)
+  } finally {
+    db.close();
+  }
+  return rst;
+}
 
 async function register(username, password){
   const db = await openDB();
@@ -285,6 +293,19 @@ async function register(username, password){
   }
   return rst;
 }
+
+const services = {
+  initialize,
+  addUser,
+  addTask,
+  showTaskByDate,
+  deleteTask,
+  loginUser,
+  changePassword,
+  scheduleReminder,
+  sendReminder,
+  queryTasks
+};
 
 // Export the services object
 initialize()
