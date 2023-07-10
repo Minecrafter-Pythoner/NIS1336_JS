@@ -43,7 +43,7 @@ const showTaskByDate = (req, res) => {
 }
 
 const deleteTask =  async (req, res) => {
-    const { id } = req.body;
+    const { taskId } = req.params;
     const rst = await svr.deleteTask(taskId);
     if(rst){
         res.status(200);
@@ -69,6 +69,14 @@ const sendReminder = (req, res) => {
     // Send appropriate response to the client
 }
 
+async function queryTasks(req, res){
+    console.log('1');
+    const result = await svr.queryTasks();
+    console.log(JSON.stringify(result));
+    res.send(result);
+}
+
+
 const register = (req, res) => {
 
 }
@@ -80,5 +88,6 @@ module.exports = {
     showTaskByDate,
     deleteTask,
     reminders,
+    queryTasks,
     sendReminder
 }
