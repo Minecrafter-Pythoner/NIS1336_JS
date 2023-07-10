@@ -24,14 +24,15 @@ const changePassword =  async (req, res) => {
         res.send('Password Changed Successfully');
     } else {
         res.status(404);
-        res.send('Failed to change passwrod');
+        res.send('Failed to change password');
     }
     // Send appropriate response to the client
 }
 
-const addTask = (req, res) => {    
-    const { name, startTime, priority, category, reminderTime } = req.body;
-    svr.addTask(name, startTime, priority, category, reminderTime);
+const addTask = (req, res) => {
+    const userId = req.session.user;    
+    const {name, startTime, priority, category, reminderTime} = req.body;
+    svr.addTask(name, startTime, priority, category, reminderTime, userId);
     res.send('Success')
     // Send appropriate response to the client
 }

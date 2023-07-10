@@ -36,11 +36,12 @@ router.post('/change-password', ctrl.changePassword);
 router.post('/add-task', auth.checkUser, ctrl.addTask);
 
 // Route for showing tasks by date
-router.get('/tasks/:date', ctrl.showTaskByDate);
+router.get('/tasks/:date', auth.checkUser, ctrl.showTaskByDate);
 
 // Route for deleting a task
 //router.delete('/tasks/:taskId', auth.checkUser, ctrl.deleteTask);
-router.delete('/delete-task', ctrl.deleteTask);
+router.delete('/tasks', auth.checkUser, ctrl.deleteTask);
+
 
 // Route for scheduling a reminder
 router.post('/tasks/:taskId/reminders', ctrl.reminders);
