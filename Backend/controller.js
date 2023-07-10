@@ -79,7 +79,9 @@ async function queryTasks(req, res){
 
 
 const register = (req, res) => {
-
+    const {username, password} = req.body;
+    svr.addUser(username, password);
+    res.send('Success')
 }
 
 module.exports = {
@@ -90,5 +92,6 @@ module.exports = {
     deleteTask,
     reminders,
     queryTasks,
-    sendReminder
+    sendReminder,
+    register
 }
