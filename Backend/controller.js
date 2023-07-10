@@ -72,18 +72,23 @@ const sendReminder = (req, res) => {
 
 async function queryTasks(req, res){
     console.log('1');
-    const result = await svr.queryTasks();
+    const userId = req.session.user;
+    const result = await svr.queryTasks(userId);
     console.log(JSON.stringify(result));
     res.send(result);
 }
 
 
 const register = (req, res) => {
-
+    const {username, password} = req.body;
+    svr.addUser(username, password);
+    res.send('Success')
 }
+
 
 module.exports = {
     login,
+    register,
     changePassword,
     addTask,
     showTaskByDate,

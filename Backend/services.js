@@ -223,21 +223,23 @@ async function checkUser(username, password) {  // Retrieve the username and pas
   ;
 }
 
-async function queryTasks() {
+async function queryTasks(user) {
   const db = await openDB();
 
-  const sql = 'SELECT * FROM Tasks';
+  const sql = 'SELECT * FROM Tasks WHERE user = ?';
+  const values = [user];
 
   try {
-    const rows = await db.get(sql);
+    const rows = await db.all(sql, values);
     const tasks = await rows.map((row) => {
       return {
         taskId: row.id,
+        name: row.name,
         startTime: row.startTime,
         priority: row.priority,
         category: row.category,
         reminderTime: row.reminderTime,
-        userId: row.userId,
+        userId: row.user,
         done: row.done
       };
     });
@@ -263,32 +265,25 @@ const services = {
   queryTasks
 };
 
-async function queryTasks() {
+async function register(username, password){
   const db = await openDB();
-  console.log('2');
-  const sql = 'SELECT * FROM Tasks';
+  let rst = false;
+  const sql = `
+    INSERT INTO Users (username, password)
+    VALUES (?, ?)
+  `
+  const values = [username, password];
 
-  try {
-    const rows = await db.all(sql);
-    const tasks = await rows.map((row) => {
-      return {
-        taskId: row.id,
-        startTime: row.startTime,
-        priority: row.priority,
-        category: row.category,
-        reminderTime: row.reminderTime,
-        userId: row.userId,
-        done: row.done
-      };
-    });
-    console.log(JSON.stringify(tasks));
-    return JSON.stringify(tasks);
-  } catch (err) {
-    console.error('Error querying tasks:', err);
-    return null;
+  try{
+    await db.get(sql, values);
+    console.log('User added successfully!');
+    rst = true;
+  } catch(err){
+    console.error('Error adding user:', err)
   } finally {
     db.close();
   }
+  return rst;
 }
 
 // Export the services object
