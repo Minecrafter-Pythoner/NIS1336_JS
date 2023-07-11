@@ -25,7 +25,7 @@ router.post('/login', ctrl.login);
 router.post('/signup', ctrl.register);
 
 router.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'dashboard_2.html'));
 });
 
 // Route for changing password
