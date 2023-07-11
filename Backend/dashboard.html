@@ -23,7 +23,7 @@
 
       return `${month}/${day}/${hours}/${minutes}`;
     }
-    async function updateTaskList() {
+    async function updateTaskList(){
       const taskList = document.getElementById('taskList');
       let time = new Date();
       time = transferTimeFromat(time);
@@ -44,6 +44,7 @@
             boldText.textContent = `${task.taskId} - ${task.name} -  ${task.startTime} - ${task.category} - ${task.priority} - ${task.reminderTime} - OVERDUE`;
             taskList.appendChild(boldText);
             taskList.appendChild(boldendl);
+            //alert(`Task ${task.taskId} is OVERDUE`);
           }
           else{
             li.textContent = `${task.taskId} - ${task.name} -  ${task.startTime} - ${task.category} - ${task.priority} - ${task.reminderTime}`;
@@ -54,8 +55,9 @@
         console.error('Error fetching tasks:', error);
       }
       taskList.style.display = 'block';
-      setTimeout(updateTaskList, 3000);
+      setTimeout(updateTaskList,30000);
     }
+    updateTaskList();
   /*async function toupdate(){
     while(true){
       sleep(3000);
@@ -72,7 +74,6 @@
   }
   runPeriod();*/
     // Call the updateTaskList function to initially populate the task list
-  updateTaskList();
     
   </script>
     <form id="add-task-form">

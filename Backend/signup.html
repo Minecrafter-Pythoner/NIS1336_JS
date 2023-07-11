@@ -6,24 +6,25 @@
 </head>
 <body>
   <div class="box">
-    <h2>Login</h2>
-    <form action="/login" method="POST">
+    <h2>Sign Up</h2>
+    <form action="/signup" method="POST">
       <div class="input-box">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required><br><br>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required><br><br>
-        <input type="submit" value="Login">
+        <input type="submit" value="Sign Up">
       </div>
     </form>
     <div class="input-box">
-      <input type="button" value="Sign Up" onclick="redirectToSignUp()">
-      <script>
-        function redirectToSignUp(){
-          window.location.href = 'signup.html';
-        }
-      </script>
+      <input type="button" value="Return to Login" onclick="redirectToLogin()">
     </div>
+    <script>
+      function redirectToLogin(){
+        window.location.href='login.html';
+      }
+    </script>
   </div>
+
 </body>
 </html>
