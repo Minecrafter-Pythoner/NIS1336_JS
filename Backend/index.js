@@ -6,6 +6,7 @@ const port = 3000;
 // Set up middleware, such as body-parser, to parse request bodies
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static('./'));
 
 app.use(
   session({

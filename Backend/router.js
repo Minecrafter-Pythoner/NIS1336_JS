@@ -24,6 +24,10 @@ router.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'));
 });
 
+router.get('/signup', (req, res) => {
+  res.sendFile(path.join(__dirname, 'signup.html'));
+});
+
 router.post('/signup', ctrl.register);
 
 router.get('/dashboard', (req, res) => {
