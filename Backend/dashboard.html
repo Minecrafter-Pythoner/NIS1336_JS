@@ -2,155 +2,129 @@
 <html>
 <head>
   <title>Dashboard</title>
+  <link rel="stylesheet" href="dashboard_style.css">
 </head>
 <body>
   <h1>Welcome to the Dashboard</h1>
 
   <h2>Tasks</h2>
-  <ul id="taskList">
-    <!-- Task items will be dynamically added here -->
-  </ul>
-  <script>
-    // Function to query tasks and update the HTML
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    function transferTimeFromat(time){
-      const month = String(time.getMonth() + 1).padStart(2, '0'); // Adding 1 to get the correct month
-      const day = String(time.getDate()).padStart(2, '0');
-      const hours = String(time.getHours()).padStart(2, '0');
-      const minutes = String(time.getMinutes()).padStart(2, '0');
-
-      return `${month}/${day}/${hours}/${minutes}`;
-    }
-    async function updateTaskList(){
-      const taskList = document.getElementById('taskList');
-      let time = new Date();
-      time = transferTimeFromat(time);
-      taskList.innerHTML = '';
-      // Clear existing tasks
-      try {
-        // Query tasks from the server
-        const tasksResponse = await fetch('/query-tasks');
-        const tasks = await tasksResponse.json();
-        
-        // Iterate over the tasks and create list items
-        tasks.forEach((task) => {
-          const li = document.createElement('li');
-          console.log(time);      
-          if(task.reminderTime <= time){
-            const boldendl = document.createElement('li');
-            const boldText = document.createElement('b');
-            boldText.textContent = `${task.taskId} - ${task.name} -  ${task.startTime} - ${task.category} - ${task.priority} - ${task.reminderTime} - OVERDUE`;
-            taskList.appendChild(boldText);
-            taskList.appendChild(boldendl);
-            //alert(`Task ${task.taskId} is OVERDUE`);
-          }
-          else{
-            li.textContent = `${task.taskId} - ${task.name} -  ${task.startTime} - ${task.category} - ${task.priority} - ${task.reminderTime}`;
-            taskList.appendChild(li);
-          }
-        });
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
+  <div class="databox">
+    <ul id="taskList">
+      <!-- Task items will be dynamically added here -->
+    </ul>
+    <script>
+      function transferTimeFromat(time){
+        const month = String(time.getMonth() + 1).padStart(2, '0'); // Adding 1 to get the correct month
+        const day = String(time.getDate()).padStart(2, '0');
+        const hours = String(time.getHours()).padStart(2, '0');
+        const minutes = String(time.getMinutes()).padStart(2, '0');
+  
+        return `${month}/${day}/${hours}/${minutes}`;
       }
-      taskList.style.display = 'block';
-      setTimeout(updateTaskList,30000);
-    }
-    updateTaskList();
-  /*async function toupdate(){
-    while(true){
-      sleep(3000);
-      updateTaskList();
-    }
-  }
-  toupdate();
-  */
-  /*async function runPeriod(){
-    while(true){
-      await updateTaskList();
-      await new Promise(resolve => setTimeout(resolve,30000));
-    }
-  }
-  runPeriod();*/
-    // Call the updateTaskList function to initially populate the task list
-    
-  </script>
-    <form id="add-task-form">
-    <input type="text" id="name" name="name" placeholder="Enter task name" required>
-    <input type="text" id="startTime" name="startTime" placeholder="Enter task start time" required>
-    <input type="text" id="priority" name="priority" placeholder="Enter task priority" required>
-    <input type="text" id="category" name="category" placeholder="Enter task category" required>
-    <input type="text" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
-    <button type="submit">Add Task</button>
-  </form>
+      function fetchData() {
+        fetch('/query-tasks')
+        .then(response => response.json())
+        .then(data => {
+          // Clear previous data
+          document.getElementById('taskList').innerHTML = '';
 
-  <script>
-    document.getElementById('add-task-form').addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent the default form submission
+          // Iterate through each item in the JSON data
+          data.forEach(task => {
+            // Create a new list item element
+            const listItem = document.createElement('li');
+            listItem.textContent = `${task.taskId} - ${task.name} - ${task.startTime} - ${task.priority} - ${task.category} - ${task.reminderTime}`;
+            // Append the list item to the data list
+            document.getElementById('taskList').appendChild(listItem);
+          });
+        });
+      }
 
-      const form = event.target;
-      const name = form.name.value;
-      const startTime = form.startTime.value;
-      const priority = form.priority.value;
-      const category = form.category.value;
-      const reminderTime = form.reminderTime.value;
+      // Call the fetchData function initially
+      fetchData();
 
-      fetch('/add-task', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name, startTime, priority, category, reminderTime })
-      })
-      .then(response => {
-        if (response.ok) {
-        // Task deleted successfully, perform any necessary actions
-          console.log('Task deleted successfully');
-        } else {
-        // Handle the error case
-          console.error('Error deleting task');
-        }
-      })
-      .catch(error => {
-        console.error('Error deleting task:', error);
+      // Call the fetchData function every 5 seconds (adjust as needed)
+      setInterval(fetchData, 5000);
+    </script>
+  </div>
+
+  <div class="controlbox">
+    <div class="input-box">
+      <form id="add-task-form">
+        <input type="text" id="name" name="name" placeholder="Enter task name" required>
+        <input type="text" id="startTime" name="startTime" placeholder="Enter task start time" required>
+        <input type="text" id="priority" name="priority" placeholder="Enter task priority" required>
+        <input type="text" id="category" name="category" placeholder="Enter task category" required>
+        <input type="text" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
+        <button type="submit">Add Task</button>
+      </form>
+    <script>
+      document.getElementById('add-task-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+  
+        const form = event.target;
+        const name = form.name.value;
+        const startTime = form.startTime.value;
+        const priority = form.priority.value;
+        const category = form.category.value;
+        const reminderTime = form.reminderTime.value;
+  
+        fetch('/add-task', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, startTime, priority, category, reminderTime })
+        })
+        .then(response => {
+          if (response.ok) {
+          // Task deleted successfully, perform any necessary actions
+            console.log('Task deleted successfully');
+          } else {
+          // Handle the error case
+            console.error('Error deleting task');
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting task:', error);
+        });
       });
-    });
-  </script>
-
-  <form id="deleteTaskForm">
-    <input type="text" id="taskId" name="taskId" placeholder="Enter task Id" required>
-    <button type="submit">Delete Task</button>
-  </form>
-
-  <script>
-    document.getElementById('deleteTaskForm').addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent the default form submission
-
-      const form = event.target;
-      const taskId = form.taskId.value;
-
-      fetch('/delete-task', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ taskId })
-      })
-      .then(response => {
-        if (response.ok) {
-        // Task deleted successfully, perform any necessary actions
-          console.log('Task deleted successfully');
-        } else {
-        // Handle the error case
-          console.error('Error deleting task');
-        }
-      })
-      .catch(error => {
-        console.error('Error deleting task:', error);
+    </script>
+    <form id="deleteTaskForm">
+      <input type="text" id="taskId" name="taskId" placeholder="Enter task Id" required>
+      <button type="submit">Delete Task</button>
+    </form>
+  
+    <script>
+      document.getElementById('deleteTaskForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the default form submission
+  
+        const form = event.target;
+        const taskId = form.taskId.value;
+  
+        fetch('/delete-task', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ taskId })
+        })
+        .then(response => {
+          if (response.ok) {
+          // Task deleted successfully, perform any necessary actions
+            console.log('Task deleted successfully');
+          } else {
+          // Handle the error case
+            console.error('Error deleting task');
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting task:', error);
+        });
       });
-    });
-  </script>
+    </script>
+    </div>
+  </div>
+  
   <iframe src="https://free.timeanddate.com/clock/i8xhju0g/n237/tlcn/th1" frameborder="0" width="57" height="18"></iframe>
   
 </body>

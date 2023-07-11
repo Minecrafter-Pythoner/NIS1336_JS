@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="dashboard_style.css">
+</head>
+<body>
+    <main class="table">
+        <section class="table__header">
+            <h1>Tasks</h1>
+        </section>
+        <section class="table__body">
+            <table>
+                <thead>
+                    <tr>
+                        <th> Id <span class="icon-arrow">&UpArrow;</span></th>
+                        <th> Name <span class="icon-arrow">&UpArrow;</span></th>
+                        <th> StartTime <span class="icon-arrow">&UpArrow;</span></th>
+                        <th> Priority <span class="icon-arrow">&UpArrow;</span></th>
+                        <th> Category <span class="icon-arrow">&UpArrow;</span></th>
+                        <th> ReminderTime <span class="icon-arrow">&UpArrow;</span></th>
+                        <th> OVERDUE <span class="icon-arrow">&UpArrow;</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <script>
+    let flag = new Array(1000).fill(false);
+      function transferTimeFromat(time){
+        const month = String(time.getMonth() + 1).padStart(2, '0'); // Adding 1 to get the correct month
+        const day = String(time.getDate()).padStart(2, '0');
+        const hours = String(time.getHours()).padStart(2, '0');
+        const minutes = String(time.getMinutes()).padStart(2, '0');
+  
+        return `${month}/${day}/${hours}/${minutes}`;
+      }
+      function fetchData() {
+        let time = new Date();
+        time = transferTimeFromat(time);
+        fetch('/query-tasks')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector('.table__body tbody');
+            tbody.innerHTML = '';
+          // Iterate through each item in the JSON data
+          data.forEach(task => {
+            const tr = document.createElement('tr');
+            const th1 = document.createElement('th');
+            const th2 = document.createElement('th');
+            const th3 = document.createElement('th');
+            const th4 = document.createElement('th');
+            const th5 = document.createElement('th');
+            const th6 = document.createElement('th');
+            const th7 = document.createElement('th');
+            th1.textContent = task.taskId;
+            th2.textContent = task.name;
+            th3.textContent = task.startTime;
+            th4.textContent = task.priority;
+            th5.textContent = task.category;
+            th6.textContent = task.reminderTime;
+            th7.textContent = flag[task.taskId];
+            tr.appendChild(th1);
+            tr.appendChild(th2);
+            tr.appendChild(th3);
+            tr.appendChild(th4);
+            tr.appendChild(th5);
+            tr.appendChild(th6);
+            tr.appendChild(th7);
+            tbody.appendChild(tr);
+            if(task.reminderTime <=time && !flag[task.taskId]){
+                alert(`Task ${task.taskId} is OVERDUE`);
+                flag[task.taskId] = true;
+            }
+          });
+        });
+      }
+      // Call the fetchData function initially
+      fetchData();
+      setInterval(fetchData, 2000);
+    </script> 
+    <div class="addtask">
+        <form id="add-task-form">
+            <input type="text" id="name" name="name" placeholder="Enter task name" required>
+            <input type="text" id="startTime" name="startTime" placeholder="Enter task start time" required>
+            <input type="text" id="priority" name="priority" placeholder="Enter task priority" required>
+            <input type="text" id="category" name="category" placeholder="Enter task category" required>
+            <input type="text" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
+            <button type="submit">Add Task</button>
+          </form>
+        <script>
+            document.getElementById('add-task-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+      
+            const form = event.target;
+            const name = form.name.value;
+            const startTime = form.startTime.value;
+            const priority = form.priority.value;
+            const category = form.category.value;
+            const reminderTime = form.reminderTime.value;
+      
+            fetch('/add-task', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ name, startTime, priority, category, reminderTime })
+            })
+            .then(response => {
+              if (response.ok) {
+              // Task deleted successfully, perform any necessary actions
+                console.log('Task deleted successfully');
+              } else {
+              // Handle the error case
+                console.error('Error deleting task');
+              }
+            })
+            .catch(error => {
+              console.error('Error deleting task:', error);
+            });
+          });
+        </script>
+    </div>
+    <div class="deletetask">
+        <form id="deleteTaskForm">
+            <input type="text" id="taskId" name="taskId" placeholder="Enter task Id" required>
+            <button type="submit">Delete Task</button>
+        </form>
+        
+          <script>
+            document.getElementById('deleteTaskForm').addEventListener('submit', function(event) {
+              event.preventDefault(); // Prevent the default form submission
+        
+              const form = event.target;
+              const taskId = form.taskId.value;
+        
+              fetch('/delete-task', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ taskId })
+              })
+              .then(response => {
+                if (response.ok) {
+                // Task deleted successfully, perform any necessary actions
+                  console.log('Task deleted successfully');
+                } else {
+                // Handle the error case
+                  console.error('Error deleting task');
+                }
+              })
+              .catch(error => {
+                console.error('Error deleting task:', error);
+              });
+            });
+          </script>
+    </div>
+</body>
+</html>
