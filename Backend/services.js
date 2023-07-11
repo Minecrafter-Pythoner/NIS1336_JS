@@ -252,27 +252,6 @@ async function queryTasks(user) {
   }
 }
 
-async function queryTasks() {
-  const db = await openDB();
-  let rst = false;
-  const sql = `
-    INSERT INTO Users (username, password)
-    VALUES (?, ?)
-  `
-  const values = [username, password];
-
-  try{
-    await db.get(sql, values);
-    console.log('User added successfully!');
-    rst = true;
-  } catch(err){
-    console.error('Error adding user:', err)
-  } finally {
-    db.close();
-  }
-  return rst;
-}
-
 async function register(username, password){
   const db = await openDB();
   let rst = false;
