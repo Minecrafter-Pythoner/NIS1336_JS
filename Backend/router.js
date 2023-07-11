@@ -1,21 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-// Import the backend functions
-const {
-  loginUser,
-  changePassword,
-  addTask,
-  showTaskByDate,
-  deleteTask,
-  scheduleReminder,
-  sendReminder,
-} = require('./services');      
+
 
 const ctrl = require('./controller')
 const auth = require('./auth')
 
 // Define routes and map them to the corresponding functions
+router.get('/', (req, res) => {
+  if (req.session && req.session.user) {res.sendFile(path.join(__dirname, 'dashboard.html'));}
+  else {res.sendFile(path.join(__dirname, 'login.html'));}
+})
+
 
 // Route for user login
 router.post('/login', ctrl.login);
@@ -46,7 +42,7 @@ router.get('/tasks/:date', auth.checkUser, ctrl.showTaskByDate);
 
 // Route for deleting a task
 //router.delete('/tasks/:taskId', auth.checkUser, ctrl.deleteTask);
-router.post('/delete-task', auth.checkUser, ctrl.deleteTask);
+router.delete('/delete-task', auth.checkUser, ctrl.deleteTask);
 
 
 // Route for scheduling a reminder
