@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
 </head>
+
 <body>
   <h1>Welcome to the Dashboard</h1>
 
@@ -15,7 +18,7 @@
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     }
-    function transferTimeFromat(time){
+    function transferTimeFromat(time) {
       const month = String(time.getMonth() + 1).padStart(2, '0'); // Adding 1 to get the correct month
       const day = String(time.getDate()).padStart(2, '0');
       const hours = String(time.getHours()).padStart(2, '0');
@@ -24,7 +27,7 @@
       return `${month}/${day}/${hours}/${minutes}`;
     }
 
-    async function updateTaskList(){
+    async function updateTaskList(date='') {
       const taskList = document.getElementById('taskList');
       let time = new Date();
       time = transferTimeFromat(time);
@@ -32,14 +35,14 @@
       // Clear existing tasks
       try {
         // Query tasks from the server
-        const tasksResponse = await fetch('/query-tasks');
+        const tasksResponse = await fetch(`/tasks?date=${date}`);
         const tasks = await tasksResponse.json();
-        
+
         // Iterate over the tasks and create list items
         tasks.forEach((task) => {
           const li = document.createElement('li');
           //console.log(time);
-          if(task.reminderTime <= time){
+          if (task.reminderTime <= time) {
             const boldendl = document.createElement('li');
             const boldText = document.createElement('b');
             boldText.textContent = `${task.taskId} - ${task.name} -  ${task.startTime} - ${task.category} - ${task.priority} - ${task.reminderTime} - OVERDUE`;
@@ -47,7 +50,7 @@
             taskList.appendChild(boldendl);
             //alert(`Task ${task.taskId} is OVERDUE`);
           }
-          else{
+          else {
             li.textContent = `${task.taskId} - ${task.name} -  ${task.startTime} - ${task.category} - ${task.priority} - ${task.reminderTime}`;
             taskList.appendChild(li);
           }
@@ -57,37 +60,50 @@
       }
       taskList.style.display = 'block';
     }
-    setInterval(()=>{updateTaskList}, 10000);
+    setInterval(() => { updateTaskList }, 10000);
     updateTaskList();
   /*async function toupdate(){
-    while(true){
-      sleep(3000);
-      updateTaskList();
+        while(true){
+          sleep(3000);
+          updateTaskList();
+        }
+      }
+      toupdate();
+      */
+    /*async function runPeriod(){
+      while(true){
+        await updateTaskList();
+        await new Promise(resolve => setTimeout(resolve,30000));
+      }
     }
-  }
-  toupdate();
-  */
-  /*async function runPeriod(){
-    while(true){
-      await updateTaskList();
-      await new Promise(resolve => setTimeout(resolve,30000));
-    }
-  }
-  runPeriod();*/
+    runPeriod();*/
     // Call the updateTaskList function to initially populate the task list
-    
+
   </script>
-    <form id="add-task-form">
-    <input type="text" id="name" name="name" placeholder="Enter task name" required>
-    <input type="text" id="startTime" name="startTime" placeholder="Enter task start time" required>
+  <form id="add-task-form">
+    <div class="form-div">
+      <label class="label">Task Name</label>
+      <input type="text" id="name" name="name" placeholder="Enter task name" required>
+    </div>
+    <div class="form-div">
+      <label class="label">Start Time</label>
+      <input type="datetime-local" id="startTime" name="startTime" placeholder="Enter task start time" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}" required>
+    </div>
     <input type="text" id="priority" name="priority" placeholder="Enter task priority" required>
     <input type="text" id="category" name="category" placeholder="Enter task category" required>
-    <input type="text" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
+    <input type="datetime-local" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
     <button type="submit">Add Task</button>
   </form>
 
+  
+  <button type="button" onclick="queryByDate()">Query Task</button>
+
   <script>
-    document.getElementById('add-task-form').addEventListener('submit', function(event) {
+    function queryByDate() {
+      let date = '2023-07-11'
+      updateTaskList(date);
+    }
+    document.getElementById('add-task-form').addEventListener('submit', function (event) {
       event.preventDefault(); // Prevent the default form submission
 
       const form = event.target;
@@ -102,21 +118,21 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name, startTime, priority, category, reminderTime })
+        body: JSON.stringify({ name, startTime:startTime.replace('T',' '), priority, category, reminderTime:reminderTime.replace('T',' ') })
       })
-      .then(response => {
-        if (response.ok) {
-        // Task deleted successfully, perform any necessary actions
-          console.log('Task added successfully');
-          updateTaskList();
-        } else {
-        // Handle the error case
-          console.error('Error adding task');
-        }
-      })
-      .catch(error => {
-        console.error('Error adding task:', error);
-      });
+        .then(response => {
+          if (response.ok) {
+            // Task deleted successfully, perform any necessary actions
+            console.log('Task added successfully');
+            updateTaskList();
+          } else {
+            // Handle the error case
+            console.error('Error adding task');
+          }
+        })
+        .catch(error => {
+          console.error('Error adding task:', error);
+        });
     });
   </script>
 
@@ -126,7 +142,7 @@
   </form>
 
   <script>
-    document.getElementById('deleteTaskForm').addEventListener('submit', function(event) {
+    document.getElementById('deleteTaskForm').addEventListener('submit', function (event) {
       event.preventDefault(); // Prevent the default form submission
 
       const form = event.target;
@@ -139,22 +155,24 @@
         },
         body: JSON.stringify({ taskId })
       })
-      .then(response => {
-        if (response.ok) {
-        // Task deleted successfully, perform any necessary actions
-          console.log('Task deleted successfully');
-          updateTaskList();
-        } else {
-        // Handle the error case
-          console.error('Error deleting task');
-        }
-      })
-      .catch(error => {
-        console.error('Error deleting task:', error);
-      });
+        .then(response => {
+          if (response.ok) {
+            // Task deleted successfully, perform any necessary actions
+            console.log('Task deleted successfully');
+            updateTaskList();
+          } else {
+            // Handle the error case
+            console.error('Error deleting task');
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting task:', error);
+        });
     });
   </script>
-  <iframe src="https://free.timeanddate.com/clock/i8xhju0g/n237/tlcn/th1" frameborder="0" width="57" height="18"></iframe>
-  
+  <iframe src="https://free.timeanddate.com/clock/i8xhju0g/n237/tlcn/th1" frameborder="0" width="57"
+    height="18"></iframe>
+
 </body>
+
 </html>
