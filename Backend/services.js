@@ -5,17 +5,11 @@ const sqlite = require("sqlite");
 const dbPath = './data/data.db';
 const sqlPath = './data/data.sqlite';
 
-// function openDB() {
-//   // Create a new SQLite database object
-//   //const db = new sqlite3.Database(dbPath);
-//   const db = new sqlite.Database(sqlPath);
-//   // Return the database object
-//   return db;
-// }
+const key = "ToDo";
 
 async function openDB() {
   return sqlite.open({
-    filename: sqlPath,
+    filename: dbPath,
     driver: sqlite3.Database
   })
 }
@@ -52,7 +46,9 @@ async function addUser(username, password) {
 
   // Prepare the SQL statement with placeholders for the username and password
   const sql = 'INSERT INTO Users (username, password) VALUES (?, ?)';
-  const values = [username, password];
+  var encryptedPassword = CryptoJS.SHA256(password).toString();
+  const values = [username, encryptedPassword];
+  // console.log(encryptedPassword);
 
   try {
     const row = await db.get(sql, values);
@@ -60,6 +56,7 @@ async function addUser(username, password) {
     console.log('User ID:', this.lastID);
   } catch (err) {
     console.error('Error adding user:', err);
+    throw (err);
   } finally {
     db.close();
   }
@@ -91,25 +88,35 @@ async function addTask(name, startTime, priority, category, reminderTime, userId
 
 async function showTaskByDate(date) {
   const db = await openDB();
+  let rst = [];
 
   const sql = `
-    SELECT *
-    FROM Tasks
-    WHERE DATE(startTime) = DATE(?)
-    ORDER BY startTime
+    SELECT * FROM Tasks WHERE startTime like '${date}%'
   `;
-  const values = [date];
 
   try {
-    const rows = db.get(sql, values);
-    console.log(rows);
+    const rows = await db.all(sql);
+    //console.log(rows);
+    rst = rows.map((row) => {
+      return {
+        taskId: row.id,
+        name: row.name,
+        startTime: row.startTime,
+        priority: row.priority,
+        category: row.category,
+        reminderTime: row.reminderTime,
+        userId: row.user,
+        done: row.done
+      };
+    });
 
     console.log('Shown Tasks By Date!');
-    rst = rows;
   } catch (err) {
     console.log(err);
+    throw(err);
   } finally {
     db.close;
+    return rst;
   }
 }
 
@@ -139,11 +146,12 @@ async function loginUser(username, password) {//ERR: Not working as expected alw
   const db = await openDB();
   let rst = 0;
   const sql = 'SELECT id FROM Users WHERE username = ? AND password = ?';
-  const values = [username, password];
+  const encryptedPassword = CryptoJS.SHA256(password).toString();
+  const values = [username, encryptedPassword];
 
   try {
     const row = await db.get(sql, values);
-    console.log(row);
+    //console.log(row);
 
     console.log('User authenticated!');
     console.log('User ID:', row.id);
@@ -160,6 +168,7 @@ async function changePassword(userId, newPassword) {//ERR: Not working as expect
   const db = await openDB();
 
   const sql = 'UPDATE Users SET password = ? WHERE id = ?';
+  const encryptedNewPassword = CryptoJS.SHA256(newPassword).toString();
   const values = [newPassword, userId];
   let rst = false;
 
@@ -169,58 +178,30 @@ async function changePassword(userId, newPassword) {//ERR: Not working as expect
     rst = true;
   } catch (err) {
     console.log('Error changing password: ', err);
+    throw (err);
   } finally {
     db.close();
     return rst;
   }
-
-  // try {
-  //   await new Promise((resolve, reject) => {
-  //     let rst = false;
-  //     db.run(sql, values, function (err) {
-  //       if (err) {
-  //         reject(err);
-  //       } else {
-  //         resolve();
-  //       }
-  //     });
-  //   });
-  //   console.log('Password changed successfully!');
-  //   rst = true;
-  // } catch (err) {
-  //   console.error('Error changing password:', err);
-  // } finally {
-  //   db.close();
-  //   return rst;
-  // }
 }
 
-
-async function scheduleReminder(taskId, reminderTime) {
-  // Implement your logic to schedule reminders here
-  // This function may involve external libraries or services to handle reminders
-  // You can integrate with a notification service or schedule tasks in the server
-
-  console.log('Reminder scheduled for Task ID:', taskId);
-}
-
-async function sendReminder(userId, reminderMessage) {
-  // Implement your logic to send reminders to the user
-  // This function may involve sending emails, push notifications, or other forms of notifications
-
-  console.log('Reminder sent to User ID:', userId);
-}
-
-async function checkUser(username, password) {  // Retrieve the username and password from the request body or headers
+async function checkTaskUser(taskId, userId) {  // Retrieve the username and password from the request body or headers
 
   // Open the database connection
   const db = await openDB();
+  const sql = `SELECT * from Tasks WHERE id = ${taskId} and user = ${userId}`
+  // const values = [taskId, userId];
+  let rst = false;
 
-
-  db.close();
-  // Call the next middleware or route handler
-  next();
-  ;
+  try {
+    const row = await db.get(sql);
+    rst = (row.length !== 0);
+  } catch (err) {
+    console.log(err);
+  } finally {
+    db.close();
+  }
+  return rst;
 }
 
 async function queryTasks(user) {
@@ -231,7 +212,7 @@ async function queryTasks(user) {
 
   try {
     const rows = await db.all(sql, values);
-    const tasks = await rows.map((row) => {
+    const tasks = rows.map((row) => {
       return {
         taskId: row.id,
         name: row.name,
@@ -260,33 +241,12 @@ const services = {
   deleteTask,
   loginUser,
   changePassword,
-  scheduleReminder,
-  sendReminder,
-  queryTasks
+  queryTasks,
+  checkTaskUser
 };
-
-async function register(username, password){
-  const db = await openDB();
-  let rst = false;
-  const sql = `
-    INSERT INTO Users (username, password)
-    VALUES (?, ?)
-  `
-  const values = [username, password];
-
-  try{
-    await db.get(sql, values);
-    console.log('User added successfully!');
-    rst = true;
-  } catch(err){
-    console.error('Error adding user:', err)
-  } finally {
-    db.close();
-  }
-  return rst;
-}
 
 // Export the services object
 initialize()
 
 module.exports = services;
+

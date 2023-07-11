@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Dashboard</title>
+
   <link rel="stylesheet" href="dashboard_style.css">
+
 </head>
+
 <body>
   <h1>Welcome to the Dashboard</h1>
 
   <h2>Tasks</h2>
+
   <div class="databox">
     <ul id="taskList">
       <!-- Task items will be dynamically added here -->
@@ -39,13 +44,10 @@
         });
       }
 
+
       // Call the fetchData function initially
       fetchData();
 
-      // Call the fetchData function every 5 seconds (adjust as needed)
-      setInterval(fetchData, 5000);
-    </script>
-  </div>
 
   <div class="controlbox">
     <div class="input-box">
@@ -120,6 +122,7 @@
         .catch(error => {
           console.error('Error deleting task:', error);
         });
+
       });
     </script>
     </div>
@@ -127,5 +130,7 @@
   
   <iframe src="https://free.timeanddate.com/clock/i8xhju0g/n237/tlcn/th1" frameborder="0" width="57" height="18"></iframe>
   
+
 </body>
+
 </html>
