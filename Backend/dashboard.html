@@ -14,19 +14,6 @@
     <!-- Task items will be dynamically added here -->
   </ul>
   <script>
-    // Function to query tasks and update the HTML
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    function transferTimeFromat(time) {
-      const month = String(time.getMonth() + 1).padStart(2, '0'); // Adding 1 to get the correct month
-      const day = String(time.getDate()).padStart(2, '0');
-      const hours = String(time.getHours()).padStart(2, '0');
-      const minutes = String(time.getMinutes()).padStart(2, '0');
-
-      return `${month}/${day}/${hours}/${minutes}`;
-    }
-
     async function updateTaskList(date='') {
       const taskList = document.getElementById('taskList');
       let time = new Date();
@@ -89,9 +76,18 @@
       <label class="label">Start Time</label>
       <input type="datetime-local" id="startTime" name="startTime" placeholder="Enter task start time" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}" required>
     </div>
-    <input type="text" id="priority" name="priority" placeholder="Enter task priority" required>
-    <input type="text" id="category" name="category" placeholder="Enter task category" required>
-    <input type="datetime-local" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
+    <div class="form-div">
+      <label class="label">Priority</label>
+      <input type="text" id="priority" name="priority" placeholder="Enter task priority" required>
+    </div>
+    <div class="form-div">
+      <label class="label">Category</label>
+      <input type="text" id="category" name="category" placeholder="Enter task category" required>
+    </div>
+    <div class="form-div">
+      <label class="label">Reminder Time</label>
+      <input type="datetime-local" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
+    </div>
     <button type="submit">Add Task</button>
   </form>
 
