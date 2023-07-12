@@ -28,8 +28,14 @@
             </table>
         </section>
     </main>
+    <div class="check_by_date">
+        <label for="showTaskByDate"></label>
+        <input type="checkbox" id="date_checkbox">
+        <input type="text" id="date_to_show" name="date_to_show" placeholder="Enter the date of tasks">
+    </div>
     <script>
-    let flag = new Array(1000).fill(false);
+        let flag = new Array(1000).fill(false);
+        const checkbox = document.getElementById('date_checkbox');
       function transferTimeFromat(time){
         const month = String(time.getMonth() + 1).padStart(2, '0'); // Adding 1 to get the correct month
         const day = String(time.getDate()).padStart(2, '0');
@@ -41,7 +47,15 @@
       function fetchData() {
         let time = new Date();
         time = transferTimeFromat(time);
-        fetch('/query-tasks')
+        const bydate = document.getElementById('date_to_show')
+        console.log(bydate.value);
+        let choice = '/query-tasks';
+        if(checkbox.checked && bydate.value){
+            choice = '/tasks?date=' + bydate.value ;
+        }
+        console.log(checkbox.checked);
+        console.log(choice);
+        fetch(choice)
         .then(response => response.json())
         .then(data => {
             const tbody = document.querySelector('.table__body tbody');
