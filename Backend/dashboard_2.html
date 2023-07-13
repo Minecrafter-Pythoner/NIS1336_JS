@@ -28,20 +28,35 @@
             </table>
         </section>
     </main>
+    <div class="check_by_date">
+        <label for="showTaskByDate"></label>
+        <input type="checkbox" id="date_checkbox">
+        <input type="date" id="date_to_show" name="date_to_show" placeholder="Enter the date of tasks">
+    </div>
     <script>
-    let flag = new Array(1000).fill(false);
+        let flag = new Array(1000).fill(false);
+        const checkbox = document.getElementById('date_checkbox');
       function transferTimeFromat(time){
-        const month = String(time.getMonth() + 1).padStart(2, '0'); // Adding 1 to get the correct month
+        const year = time.getFullYear();
+        const month = String(time.getMonth() + 1).padStart(2, '0');
         const day = String(time.getDate()).padStart(2, '0');
         const hours = String(time.getHours()).padStart(2, '0');
         const minutes = String(time.getMinutes()).padStart(2, '0');
   
-        return `${month}/${day}/${hours}/${minutes}`;
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
       }
       function fetchData() {
         let time = new Date();
         time = transferTimeFromat(time);
-        fetch('/query-tasks')
+        const bydate = document.getElementById('date_to_show')
+        console.log(bydate.value);
+        let choice = '/query-tasks';
+        if(checkbox.checked && bydate.value){
+            choice = '/tasks?date=' + bydate.value ;
+        }
+        console.log(checkbox.checked);
+        console.log(choice);
+        fetch(choice)
         .then(response => response.json())
         .then(data => {
             const tbody = document.querySelector('.table__body tbody');
@@ -85,10 +100,10 @@
     <div class="addtask">
         <form id="add-task-form">
             <input type="text" id="name" name="name" placeholder="Enter task name" required>
-            <input type="text" id="startTime" name="startTime" placeholder="Enter task start time" required>
+            <input type="datetime-local" id="startTime" name="startTime" placeholder="Enter task start time" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}" required>
             <input type="text" id="priority" name="priority" placeholder="Enter task priority" required>
             <input type="text" id="category" name="category" placeholder="Enter task category" required>
-            <input type="text" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
+            <input type="datetime-local" id="reminderTime" name="reminderTime" placeholder="Enter task reminder time" required>
             <button type="submit">Add Task</button>
           </form>
         <script>
@@ -107,7 +122,7 @@
               headers: {
                 'Content-Type': 'application/json'
               },
-              body: JSON.stringify({ name, startTime, priority, category, reminderTime })
+              body: JSON.stringify({ name, startTime:startTime.replace('T',' '), priority, category, reminderTime:reminderTime.replace('T',' ') })
             })
             .then(response => {
               if (response.ok) {
@@ -138,7 +153,7 @@
               const taskId = form.taskId.value;
         
               fetch('/delete-task', {
-                method: 'POST',
+                method: 'DELETE',
                 headers: {
                   'Content-Type': 'application/json'
                 },
